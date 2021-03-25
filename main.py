@@ -1,4 +1,6 @@
 from math import log2
+from sys import setrecursionlimit
+
 n = []
 table_phi = []
 table_ksi = []
@@ -18,7 +20,7 @@ def phi_ksi_fun(vec, x, mode):
 def h_fun(vec, x):
     xn = phi_ksi_fun(vec.copy(), x, "phi")
 
-    for i in range(0, len(vec) - 1):
+    for i in range(len(vec) - 1):
         vec[i] = vec[i + 1]
     vec.pop(-1)
     vec.append(xn)
@@ -33,11 +35,12 @@ def f_fun(vec, x):
 def dec_to_bin(number):
     global n
     res_vec = []
-    for i in range(0, n):
+    for i in range(n):
         res_vec.append(number % 2)
         number //= 2
     res_vec.reverse()
     return res_vec
+
 
 def bin_to_dec(vec):
     number = 0
@@ -46,11 +49,10 @@ def bin_to_dec(vec):
     return number
 
 
-
 def make_reach_table():
     global n
     reach_table = []
-    for  i in range(0, 2 ** n):
+    for i in range(2 ** n):
         table_line = [0] * 2 ** n
         table_line[bin_to_dec(h_fun(dec_to_bin(i), 0))] = 1
         table_line[bin_to_dec(h_fun(dec_to_bin(i), 1))] = 1
@@ -64,12 +66,12 @@ def depth_first_search(reach_table, mode):
     marked = []
     result = []
 
-    for i in range(0, 2**n):
+    for i in range(2 ** n):
         flag = False
         for item in result:
             if i in item:
                 flag = True
-            break
+                break
 
         if flag:
             continue
@@ -77,22 +79,61 @@ def depth_first_search(reach_table, mode):
             marked.append(i)
             stack.append(i)
 
-            for j in range(0, reach_table[i]):
-                if reach_table[i][j] == 1 and i != j:
+            while len(stack) != 0:
+                for j in range(len(reach_table[i])):
+                    if (((reach_table[i][j] == 1 or reach_table[j][i] == 1) and mode == "normal") or (reach_table[i][j] == 1 and mode == "strong")) and i != j:
+                        flag = False
+                        for item in result:
+                            if j in item:
+                                flag = True
+                                break
 
+                        if flag or j in marked:
+                            continue
+                        else:
+                            marked.append(j)
+                            stack.append(j)
+                            dps_rec(reach_table, j, marked, stack, result, mode)
+                            stack.pop(-1)
+                stack.pop(-1)
+            result.append(marked)
+            marked = []
+    return result
+
+
+def dps_rec(reach_table, i, marked, stack, result, mode):
+    for j in range(len(reach_table[i])):
+        if (((reach_table[i][j] == 1 or reach_table[j][i] == 1) and mode == "normal") or (reach_table[i][j] == 1 and mode == "strong")) and i != j:
+            flag = False
+            for item in result:
+                if j in item:
+                    flag = True
+                    break
+
+            if flag or j in marked:
+                continue
+            else:
+                marked.append(j)
+                stack.append(j)
+                dps_rec(reach_table, j, marked, stack, result, mode)
+                stack.pop(-1)
 
 
 def main():
-    with open("params.txt", 'r') as file:
+    with open("8_n12.txt", 'r') as file:
         lines = file.readlines()
         global table_phi, table_ksi, n
         n = int(lines[0])
         table_phi = list(map(lambda x: int(x), lines[2].replace("\n", "").split(" ")))
         table_ksi = list(map(lambda x: int(x), lines[4].replace("\n", "").split(" ")))
-
-    for line in make_reach_table():
-        print(line)
-    # print(make_reach_table())
+    setrecursionlimit(2**n + 10)
+    reach_table = make_reach_table()
+    links = depth_first_search(reach_table, "normal")
+    print("Automat is linked") if len(links) == 1 else print("Automat is not linked")
+    print("Linked components: {}".format(links))
+    strong_links = depth_first_search(reach_table, "strong")
+    print("Automat is strongly linked") if len(strong_links) == 1 else print("Automat is not strongly linked")
+    print("Strongly linked components: {}".format(strong_links))
     print("Enter s: ")
     s = list(map(lambda x: int(x), input().split(" ")))
 
@@ -106,8 +147,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
