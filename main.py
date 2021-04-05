@@ -119,8 +119,43 @@ def dps_rec(reach_table, i, marked, stack, result, mode):
                 stack.pop(-1)
 
 
+def equal_prep():
+    global n
+    equal_array = []
+    state_info = []
+    for i in range(2**n):
+        state = dec_to_bin(i)
+        for j in [0, 1]:
+            state_info.append(bin_to_dec(h_fun(state, j)))
+            state_info.append(f_fun(state, j))
+        equal_array.append(state_info)
+        state_info = []
+    return equal_array
+
+
+def equal_search(equal_array):
+    equal_classes = []
+    equal_class = []
+    for i in range(len(equal_array) - 1):
+        flag = False
+        for item in equal_classes:
+            if i in item:
+                flag = True
+                break
+        if flag:
+            continue
+        else:
+            equal_class.append(i)
+            for j in range(i + 1, len(equal_array)):
+                if equal_array[i][1] == equal_array[j][1] and equal_array[i][3] == equal_array[j][3]:
+                    equal_class.append(j)
+            equal_classes.append(equal_class)
+            equal_class = []
+    return equal_classes
+
+
 def main():
-    with open("8_n12.txt", 'r') as file:
+    with open("params.txt", 'r') as file:
         lines = file.readlines()
         global table_phi, table_ksi, n
         n = int(lines[0])
@@ -134,6 +169,7 @@ def main():
     strong_links = depth_first_search(reach_table, "strong")
     print("Automat is strongly linked") if len(strong_links) == 1 else print("Automat is not strongly linked")
     print("Strongly linked components: {}".format(strong_links))
+    print("{}".format(equal_search(equal_prep())))
     print("Enter s: ")
     s = list(map(lambda x: int(x), input().split(" ")))
 
