@@ -1,4 +1,3 @@
-from math import log2
 from sys import setrecursionlimit
 
 n = []
@@ -136,7 +135,7 @@ def equal_prep():
 def equal_search(equal_array):
     equal_classes = []
     equal_class = []
-    for i in range(len(equal_array) - 1):
+    for i in range(len(equal_array)):
         flag = False
         for item in equal_classes:
             if i in item:
@@ -154,8 +153,38 @@ def equal_search(equal_array):
     return equal_classes
 
 
+def find_class(classes, item):
+    for i in range(len(classes)):
+        if item in classes[i]:
+            return i
+
+
+def equal_search_final(equal_array, equal_classes):
+    new_classes = []
+    new_class = []
+    for item in equal_classes:
+        for i in range(len(item)):
+            flag = False
+            for s in new_classes:
+                if item[i] in s:
+                    flag = True
+                    break
+            if flag:
+                continue
+            else:
+                new_class.append(item[i])
+                class_0 = find_class(equal_classes, equal_array[item[i]][0])
+                class_1 = find_class(equal_classes, equal_array[item[i]][2])
+                for j in range(i + 1, len(item)):
+                    if find_class(equal_classes, equal_array[item[j]][0]) == class_0 and find_class(equal_classes, equal_array[item[j]][2]) == class_1:
+                        new_class.append(item[j])
+                new_classes.append(new_class)
+                new_class = []
+    return new_classes
+
+
 def main():
-    with open("params.txt", 'r') as file:
+    with open("8_n12.txt", 'r') as file:
         lines = file.readlines()
         global table_phi, table_ksi, n
         n = int(lines[0])
@@ -169,7 +198,15 @@ def main():
     strong_links = depth_first_search(reach_table, "strong")
     print("Automat is strongly linked") if len(strong_links) == 1 else print("Automat is not strongly linked")
     print("Strongly linked components: {}".format(strong_links))
-    print("{}".format(equal_search(equal_prep())))
+    equal_array = equal_prep()
+    classes = equal_search_final(equal_array, equal_search(equal_array))
+    flag = False
+    while len(classes) != 2**n and not flag:
+        old_classes = classes.copy()
+        classes = equal_search_final(equal_array, classes)
+        if old_classes == classes:
+            flag = True
+    print("Equivalence classes: {}".format(classes))
     print("Enter s: ")
     s = list(map(lambda x: int(x), input().split(" ")))
 
