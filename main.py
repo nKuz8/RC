@@ -104,7 +104,11 @@ def depth_first_search(reach_table, mode):
                     dps_rec(reach_table, marked[j], marked_new, stack_new, result_new, "strong")
                     if marked[0] not in marked_new:
                         marked_copy.remove(marked[j])
+                    marked_new = []
+                    stack_new = []
+                    result_new = []
                 marked = marked_copy.copy()
+
             result.append(marked)
             marked = []
     return result
@@ -135,8 +139,8 @@ def equal_prep():
     for i in range(2**n):
         state = dec_to_bin(i)
         for j in [0, 1]:
-            state_info.append(bin_to_dec(h_fun(state, j)))
-            state_info.append(f_fun(state, j))
+            state_info.append(bin_to_dec(h_fun(state.copy(), j)))
+            state_info.append(f_fun(state.copy(), j))
         equal_array.append(state_info)
         state_info = []
     return equal_array
@@ -202,7 +206,9 @@ def main():
         table_ksi = list(map(lambda x: int(x), lines[4].replace("\n", "").split(" ")))
     # setrecursionlimit(2**n + 10)
     reach_table = make_reach_table()
-    print(reach_table)
+    # with open("table.txt", 'w') as table:
+    #     for item in reach_table:
+    #         table.write("{}\n".format(','.join(str(e) for e in item).replace("[", "").replace("]", "")))
     links = depth_first_search(reach_table, "normal")
     print("Automat is linked") if len(links) == 1 else print("Automat is not linked")
     print("Linked components: {}".format(links))
@@ -210,7 +216,7 @@ def main():
     print("Automat is strongly linked") if len(strong_links) == 1 else print("Automat is not strongly linked")
     print("Strongly linked components: {}".format(strong_links))
     equal_array = equal_prep()
-    classes = equal_search_final(equal_array, equal_search(equal_array))
+    classes = equal_search(equal_array)
     flag = False
     while len(classes) != 2**n and not flag:
         old_classes = classes.copy()
