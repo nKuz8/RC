@@ -95,6 +95,16 @@ def depth_first_search(reach_table, mode):
                             dps_rec(reach_table, j, marked, stack, result, mode)
                             stack.pop(-1)
                 stack.pop(-1)
+            if mode == "strong":
+                marked_new = []
+                stack_new = []
+                result_new = []
+                marked_copy = marked.copy()
+                for j in range(1, len(marked)):
+                    dps_rec(reach_table, marked[j], marked_new, stack_new, result_new, "strong")
+                    if marked[0] not in marked_new:
+                        marked_copy.remove(marked[j])
+                marked = marked_copy.copy()
             result.append(marked)
             marked = []
     return result
@@ -184,14 +194,15 @@ def equal_search_final(equal_array, equal_classes):
 
 
 def main():
-    with open("8_n12.txt", 'r') as file:
+    with open("8_n6.txt", 'r') as file:
         lines = file.readlines()
         global table_phi, table_ksi, n
         n = int(lines[0])
         table_phi = list(map(lambda x: int(x), lines[2].replace("\n", "").split(" ")))
         table_ksi = list(map(lambda x: int(x), lines[4].replace("\n", "").split(" ")))
-    setrecursionlimit(2**n + 10)
+    # setrecursionlimit(2**n + 10)
     reach_table = make_reach_table()
+    print(reach_table)
     links = depth_first_search(reach_table, "normal")
     print("Automat is linked") if len(links) == 1 else print("Automat is not linked")
     print("Linked components: {}".format(links))
