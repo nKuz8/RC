@@ -198,7 +198,7 @@ def equal_search_final(equal_array, equal_classes):
 
 
 def main():
-    with open("8_n6.txt", 'r') as file:
+    with open("params.txt", 'r') as file:
         lines = file.readlines()
         global table_phi, table_ksi, n
         n = int(lines[0])
@@ -212,18 +212,25 @@ def main():
     links = depth_first_search(reach_table, "normal")
     print("Automat is linked") if len(links) == 1 else print("Automat is not linked")
     print("Linked components: {}".format(links))
+    print("Total: {} linked components".format(len(links)))
     strong_links = depth_first_search(reach_table, "strong")
     print("Automat is strongly linked") if len(strong_links) == 1 else print("Automat is not strongly linked")
     print("Strongly linked components: {}".format(strong_links))
+    print("Total: {} strongly linked components".format(len(strong_links)))
     equal_array = equal_prep()
     classes = equal_search(equal_array)
+    equivalence_power = 1
     flag = False
     while len(classes) != 2**n and not flag:
         old_classes = classes.copy()
         classes = equal_search_final(equal_array, classes)
         if old_classes == classes:
             flag = True
+        equivalence_power += 1
     print("Equivalence classes: {}".format(classes))
+    print("Automate is minimal") if len(classes) == 2**n else print("Automate is not minimal")
+    print("Distinguishability: {}".format(equivalence_power))
+    print("Reduced weight: {}".format(len(classes)))
     print("Enter s: ")
     s = list(map(lambda x: int(x), input().split(" ")))
 
